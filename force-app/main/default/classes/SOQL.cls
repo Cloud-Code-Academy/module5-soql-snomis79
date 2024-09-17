@@ -16,7 +16,7 @@
 * Users of this class can expect to gain a solid understanding of SOQL in Apex and
 * be prepared to handle data retrieval tasks in Salesforce development.
 * 
-* @author Your Name
+* @author Simon Lapointe
 */
 
 public with sharing class SOQL {
@@ -28,9 +28,10 @@ public with sharing class SOQL {
      * @return List of all leads with Id, LastName, Company, Phone, Email
      * Update the corresponding test class and testGetAllLeads method to cover this method
      */
-    //[public | private ] [static] data_type method_name (input parameters) {
-    //  The body of the method
-    //}
+        public static List<Lead> getAllLeads () {
+            List<Lead> allLeads = [SELECT Id, LastName, Company, Phone, Email FROM Lead];
+            return allLeads;
+        }
 
     /**
      * Question 2
@@ -39,9 +40,10 @@ public with sharing class SOQL {
      * @return A list of Contact records.
      * Update the corresponding test class and testGetContactsByFirstName method to cover this method
      */
-    //[public | private ] [static] data_type method_name (input parameters) {
-    //  The body of the method
-    //}
+        public static List<Contact> getContactsByFirstName () {
+            List<Contact> contacts= [SELECT Id, FirstName FROM Contact WHERE FirstName = 'John'];
+            return contacts;
+        }
 
     /**
      * Question 3
@@ -50,9 +52,18 @@ public with sharing class SOQL {
      * @return A list of Contact Ids.
      * Update the corresponding test class and testGetContactIdsByLastName method to cover this method
      */
-    //[public | private ] [static] data_type method_name (input parameters) {
-    //  The body of the method
-    //}
+        public static List<Id> getContactIdsByLastName () {
+        //  The body of the method
+        List<Contact> contacts = [SELECT Id FROM Contact WHERE LastName IN ('Smith', 'Jones')]; //list to hold contacts
+
+        List<Id> contactIds = new List<Id>(); //list that will hold the ids of those contact
+    
+        for(Contact c : contacts) { //loop through contacts and add their ids into the id list
+        contactIds.add(c.Id);
+        }   
+
+        return contactIds;
+        }
 
     /**
      * Question 4
@@ -63,9 +74,12 @@ public with sharing class SOQL {
      * @return A list of Opportunities with important opportunities fields
      * Update the corresponding test class and testGetClosedWonOpportunityCountByAccount method to cover this method
      */
-    //[public | private ] [static] data_type method_name (input parameters) {
-    //  The body of the method
-    //}
+        public static List<Opportunity> getClosedWonOpportunityCountByAccount (String accountId) {
+            List<Opportunity> opps = [SELECT Id, Name, AccountId, StageName, CloseDate, Amount
+                                    FROM Opportunity 
+                                    WHERE AccountId = :accountId AND StageName = 'Closed Won'];
+            return opps;
+        }
 
     /**
      * Question 5
@@ -74,9 +88,10 @@ public with sharing class SOQL {
      * @return The Integer count of Account records.
      * Update the corresponding test class and testGetAccountCount method to cover this method
      */
-    //[public | private ] [static] data_type method_name (input parameters) {
-    //  The body of the method
-    //}
+    public static Integer getAccountCount () {
+        Integer count = [SELECT COUNT() FROM Account];
+        return count;
+    }
 
     /**
      * Question 6
@@ -85,9 +100,23 @@ public with sharing class SOQL {
      * @return A map of Task Ids to Task records.
      * Update the corresponding test class and testGetTasksDueNextWeek method to cover this method
      */
-    //[public | private ] [static] data_type method_name (input parameters) {
-    //  The body of the method
-    //}
+    public static Map<Id, Task> getTasksDueNextWeek() {
+    Map <Id, Task> idAndTask = new Map <Id, Task>();
+    // Get today's date
+    Date today = Date.today();
+    // Calculate date 7 days from now
+    Date nextWeek = today.addDays(7);
+    // Query tasks due within the next 7 days
+    List <Task> tasksDue = [SELECT Id, Subject, ActivityDate 
+                            FROM Task 
+                            WHERE ActivityDate >= :today 
+                            AND ActivityDate <= :nextWeek];
+    // Loop through tasks and add them to the map
+        for(Task t : tasksDue) { 
+            idAndTask.put(t.id, t);
+        }
+    return idAndTask;
+    }
 
     /**
      * Question 7
