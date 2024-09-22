@@ -225,7 +225,7 @@ public with sharing class SOQLTest {
 
         // Assert that the number of cases returned is correct
         System.assertEquals(1, cases.size(), 'Number of cases returned is incorrect.');
-
+        System.debug(cases);
         // Assert that the cases returned have the correct Origin
         Set<Id> caseIds = new Set<Id>{testCase1.Id, testCase2.Id};
         try {
@@ -247,18 +247,18 @@ public with sharing class SOQLTest {
         Lead testLead4 = new Lead(LastName = 'Test Lead 4', Company = 'Test Company 4', Phone = '0987654321', Email = 'lead4@email.com', LeadSource = 'Web', Title = 'Sr Engineer');
         Lead testLead5 = new Lead(LastName = 'Test Lead 5', Company = 'Test Company 5', Phone = '1234567890', Email = '', LeadSource = '', Title = '');
         insert new List<Lead>{testLead1, testLead2, testLead3, testLead4};
-
+    
         // Call the method to test
-        List<Lead> leads = null; //Replace null with your method passing 'Web', 'Engineer' 
-
+        List<Lead> leads = SOQL.getLeadsBySourceOrTitle('Web', 'Engineer');
+    
         // Assert that the number of leads returned is correct
-        System.assertEquals(3, leads.size(), 'Number of leads returned is incorrect.');
-
+        Assert.areEqual(3, leads.size(), 'Number of leads returned is incorrect.');
+    
         // Assert that the leads returned have the correct names
         Set<String> leadNames = new Set<String>{'Test Lead 1', 'Test Lead 2', 'Test Lead 4'};
         try {
             for (Lead lead : leads) {
-                System.assert(leadNames.contains(lead.LastName), 'Lead name is incorrect.');
+                Assert.isTrue(leadNames.contains(lead.LastName), 'Lead name is incorrect.');
                 Assert.isNotNull(lead.Company, 'Lead company is null.');
                 Assert.isNotNull(lead.Phone, 'Lead phone is null.');
                 Assert.isNotNull(lead.Email, 'Lead email is null.');
@@ -267,6 +267,8 @@ public with sharing class SOQLTest {
             Assert.fail('SObjectException thrown: ' + ex.getMessage());
         }
     }
+    
+
 
     @IsTest
     static void testGetContactNamesByAccount() {
