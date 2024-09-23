@@ -183,15 +183,17 @@ public with sharing class SOQL {
      */
     public static List<String> getContactNamesByAccount(Id accountId) {
         // Create a list to hold the Contact LastNames
-
+        List<String>ContactsLastName = new List<String>();
         // Query the Contacts
+        List<Contact> contactsWithAccount = [SELECT Id, LastName, accountId 
+                                            FROM Contact 
+                                            WHERE accountId = :accountId];
         // Loop through each Contact and add the LastName to the list
-        //for () {
-        //    
-        //}
-
+        for (Contact c : contactsWithAccount) {
+            ContactsLastName.add(c.LastName);
+        }
         // Return the list of Contact LastNames
-        return null; // Replace null with the variable you used to store the result
+        return ContactsLastName; // Replace null with the variable you used to store the result
     }
 
     /**
@@ -203,9 +205,10 @@ public with sharing class SOQL {
      */
     public static Decimal getTotalRevenueByStage(String stage) {
         // Use AggregateQuery to get the total revenue
-
+        AggregateResult[] results = [SELECT SUM(Amount) totalAmount FROM Opportunity WHERE StageName = :stage OR Amount > 10000];
         // Return the total revenue
-        return null; // Replace null with the variable you used to store the result
+        Decimal totalRevenue = (Decimal)results[0].get('totalAmount');
+        return totalRevenue; // Replace null with the variable you used to store the result
     }
 
     /**
@@ -214,7 +217,8 @@ public with sharing class SOQL {
      * @return A list of the first 10 Accounts ordered by Name.
      */
     public static List<Account> getFirstTenAccounts() {
-        return null; // Replace null with the variable you used to store the result
+        List<Account> firstTenAccounts = [SELECT Id, Name FROM Account ORDER BY Name ASC LIMIT 10 ];
+        return firstTenAccounts; // Replace null with the variable you used to store the result
     }
     
     /**

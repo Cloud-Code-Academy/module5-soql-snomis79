@@ -252,13 +252,13 @@ public with sharing class SOQLTest {
         List<Lead> leads = SOQL.getLeadsBySourceOrTitle('Web', 'Engineer');
     
         // Assert that the number of leads returned is correct
-        Assert.areEqual(3, leads.size(), 'Number of leads returned is incorrect.');
+        System.assertEquals(3, leads.size(), 'Number of leads returned is incorrect.');
     
         // Assert that the leads returned have the correct names
         Set<String> leadNames = new Set<String>{'Test Lead 1', 'Test Lead 2', 'Test Lead 4'};
         try {
             for (Lead lead : leads) {
-                Assert.isTrue(leadNames.contains(lead.LastName), 'Lead name is incorrect.');
+                System.assert(leadNames.contains(lead.LastName), 'Lead name is incorrect.');
                 Assert.isNotNull(lead.Company, 'Lead company is null.');
                 Assert.isNotNull(lead.Phone, 'Lead phone is null.');
                 Assert.isNotNull(lead.Email, 'Lead email is null.');
