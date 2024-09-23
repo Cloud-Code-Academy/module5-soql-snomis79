@@ -217,7 +217,9 @@ public with sharing class SOQL {
      * @return A list of the first 10 Accounts ordered by Name.
      */
     public static List<Account> getFirstTenAccounts() {
-        List<Account> firstTenAccounts = [SELECT Id, Name FROM Account ORDER BY Name ASC LIMIT 10 ];
+        List<Account> firstTenAccounts =    [SELECT Id, Name 
+                                            FROM Account 
+                                            ORDER BY Name ASC LIMIT 10 ];
         return firstTenAccounts; // Replace null with the variable you used to store the result
     }
     
@@ -227,7 +229,11 @@ public with sharing class SOQL {
      * @return A list of Opportunities with an Amount greater than 100,000, ordered by CloseDate, and limited to 5 records.
      */
     public static List<Opportunity> getHighValueOpportunities() {
-        return null; // Replace null with the variable you used to store the result
+        List<Opportunity> highValueOpps =   [SELECT Id, Amount, CloseDate 
+                                            FROM Opportunity 
+                                            WHERE Amount > 100000 
+                                            ORDER BY CloseDate ASC LIMIT 5];
+        return highValueOpps; // Replace null with the variable you used to store the result
     }
     
     /**
@@ -236,7 +242,10 @@ public with sharing class SOQL {
      * @return A list of Contacts
      */
     public static List<Contact> getBirthdateContacts() {
-        return null; // Replace null with the variable you used to store the result
+        List<Contact> contactBirthdays =    [SELECT Id, Birthdate 
+                                            FROM Contact 
+                                            ORDER BY Birthdate DESC LIMIT 3];
+        return contactBirthdays; // Replace null with the variable you used to store the result
     }
     
     /**
@@ -245,7 +254,11 @@ public with sharing class SOQL {
      * @return A list of Cases
      */
     public static List<Case> getCasesWithStatus() {
-        return null; // Replace null with the variable you used to store the result
+        List<Case> casesWithStatus =    [SELECT Id, Status, CreatedDate 
+                                        FROM Case 
+                                        WHERE Status = 'Open' 
+                                        ORDER BY CreatedDate ASC LIMIT 10 OFFSET 5];
+        return casesWithStatus; // Replace null with the variable you used to store the result
     }
 
     /**
@@ -257,14 +270,14 @@ public with sharing class SOQL {
      */
     public static Set<Id> getCaseIdsByAccount(Id accountId) {
         // Create a set to hold the Case Ids
-
+        Set<Id> caseIds = new Set<Id>();
         // Query the Cases
+        List<Case> accountCases = [SELECT Id, AccountId FROM Case WHERE AccountId = :accountId];
         // Loop through each Case and add the Id to the set
-        //for () {
-        //    
-        //}
-
-        return null; // Replace null with the variable you used to store the result
+        for (case c : accountCases) {
+            caseIds.add(c.Id);
+        }
+        return caseIds; // Replace null with the variable you used to store the result
     }
 
     /**
@@ -279,9 +292,14 @@ public with sharing class SOQL {
         Map<Id, String> accountIdsToNames = new Map<Id, String>();
 
         // Query the Accounts
+        List<Account> myAccounts =  [SELECT Id, BillingCountry, Name 
+                                    FROM Account 
+                                    WHERE BillingCountry != :country];
         // Loop through each Account and add the Id and Name to the map
-
-        return null; // Replace null with the variable you used to store the result
+        for (account a : myAccounts){
+            accountIdsToNames.put(a.Id, a.Name);
+        }
+        return accountIdsToNames; // Replace null with the variable you used to store the result
     }
 
     /**
@@ -292,7 +310,9 @@ public with sharing class SOQL {
      * @return The Account Name of the Contact.
      */
     public static String getAccountNameForContact(String contactId) {
-        return null; // Replace null with the variable you used to store the result
+        List<Contact> contacts = [SELECT Id, Name, Account.Name FROM Contact WHERE Id = :contactId];
+        String accountName = contacts[0].Account.Name;
+        return accountName; // Replace null with the variable you used to store the result
     }    
 
     /**
@@ -303,7 +323,8 @@ public with sharing class SOQL {
      * @return An Account record with related Opportunities.
      */
     public static Account getAccountAndOpportunitiesFromAccountId(Id accountId) {
-        return null; // Replace null with the variable you used to store the result
+        List <Account> myAccount = [SELECT Id, Name, (SELECT Id, Name FROM Opportunities) FROM Account WHERE Id = :accountId];
+        return myAccount[0]; // Replace null with the variable you used to store the result
     }
 
     /**
@@ -315,11 +336,13 @@ public with sharing class SOQL {
      */
     public static List<Contact> getAccountsWithContactsByState(Id accountId) {
         // Query the Account
-
+        List<Account> accounts = [SELECT Id, BillingState FROM Account WHERE Id = :accountId];
         // Store the Account's BillingState
+        String accountBillingState = accounts[0].BillingState;
 
         // Query the Contacts
-        return null; // Replace null with the variable you used to store the result
+        List<Contact> contacts = [SELECT Id, MailingState FROM Contact WHERE MailingState = :accountBillingState];
+        return contacts; // Replace null with the variable you used to store the result
     }
 
     /**
@@ -332,12 +355,17 @@ public with sharing class SOQL {
      */
     public static List<Account> findAccountsByLeadEmailDomains(Set<Id> leadIds) {
         // Query the Leads
-
+        List<Lead> myLeads = [SELECT Id, Email FROM Lead WHERE Id = :leadIds];
         // Create a set of email domains from the Leads
-
+        Set<String> emails;
         // Loop through each Lead
-
-            // Get the email from the Lead
+        for (lead l : myLeads){
+        // Get the email from the Lead
+        // Check if the email is not null
+        // Add the email domain to the set
+        l.Email
+        }
+            
 
             // Check if the email is not null
 
