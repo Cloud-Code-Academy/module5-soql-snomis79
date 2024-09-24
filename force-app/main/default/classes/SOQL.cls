@@ -355,25 +355,30 @@ public with sharing class SOQL {
      */
     public static List<Account> findAccountsByLeadEmailDomains(Set<Id> leadIds) {
         // Query the Leads
-        List<Lead> myLeads = [SELECT Id, Email FROM Lead WHERE Id = :leadIds];
+        List<Lead> myLeads = [SELECT Id, Email FROM Lead WHERE Id IN :leadIds];
+        
         // Create a set of email domains from the Leads
-        Set<String> emails;
+        Set<String> emailDomains = new Set<String>();
+        
         // Loop through each Lead
-        for (lead l : myLeads){
+            for (lead l : myLeads){
         // Get the email from the Lead
         // Check if the email is not null
         // Add the email domain to the set
-        l.Email
+                if(l.email != null){
+                    emailDomains.add('%' + l.Email.substringAfter('@') + '%');
+            }
         }
-            
 
-            // Check if the email is not null
-
-                // Add the email domain to the set
-
-        
         // Query the Accounts
-        return null; // Replace null with the variable you used to store the result
+        List<Account> accountsFound =   
+            // [SELECT Id, Name, Website 
+            // FROM Account 
+            // WHERE Website IN :emailDomains];
+            [SELECT Id, Name, Website 
+            FROM Account 
+            WHERE Website LIKE :('%' + String.join(new List<String>(emailDomains), '%') + '%')];
+        return accountsFound; // Replace null with the variable you used to store the result
     }
 
     /**
@@ -386,18 +391,30 @@ public with sharing class SOQL {
      */
     public static void cloneLineItems(Id origOppId, List<Id> cloneOppIds) {
         // Query the original Opportunity Line Items
-
+        List<OpportunityLineItem> oppLineItems= [
+            SELECT Id, OpportunityId, Quantity, PricebookEntryId, UnitPrice
+            FROM OpportunityLineItem
+            WHERE OpportunityId = :origOppId];
         // Create a list to hold the new line items
-
+        List<OpportunityLineItem> newLineItems = new List<OpportunityLineItem>();
         // Generate a random number between 1 and 3
-
+        Integer genNum = Integer.valueOf((Math.random() *3));
         // Loop through each cloned Opportunity Id
-
-            // Loop through each original line item
-
+        for(Id cloneId : cloneOppIds){
+             // Loop through each original line item
+            for(OpportunityLineItem oppLI : oppLineItems){
                 // Clone the original line item and add the random number to the quantity
-
+                OpportunityLineItem newItem = new OpportunityLineItem(
+                    OpportunityId = cloneId,
+                    Quantity = genNum,
+                    PriceBookEntryId = oppLI.PriceBookEntryId,
+                    UnitPrice = oppLI.UnitPrice
+                );
+                newLineItems.add(newItem);
+            }
+        }
         // Insert the new line items
+        insert newLineItems;
     }
     
     /**
@@ -407,7 +424,11 @@ public with sharing class SOQL {
      * @return A list of filtered Opportunity
      */
     public static List<Opportunity> getOpportunityDetailsForClosedWon() {        
-        return null; // Replace null with the variable you used to store the result
+        List<Opportunity> oppClosedWon = [
+        SELECT Id, Name, StageName, Account.Name, Owner.Name
+        FROM Opportunity
+        WHERE StageName = 'Closed Won'];
+        return oppClosedWon; // Replace null with the variable you used to store the result
     }
 
     /**
@@ -417,17 +438,31 @@ public with sharing class SOQL {
      */
     public static void setPrimaryContact() {
         //Use the getOpportunityDetailsForClosedWon() method to get the Opportunities
-
+        List<Opportunity> closedWonOpps = getOpportunityDetailsForClosedWon();
         // Create a set of Account Ids from the Opportunities
-
+        Set<Id> accountIds = new Set<Id>();
+        for (Opportunity opp : closedWonOpps){
+            if(opp.AccountId != null){
+                accountIds.add(opp.AccountId);
+            }
+        }
         // Query the Contacts
-
+        List<Contact> contacts = [
+            SELECT Id, Name, AccountId
+            FROM Contact
+            WHERE AccountId IN :accountIds
+            ORDER BY CreatedDate DESC];
+        Map<Id, Id> accContact = new Map<Id, Id>();
         // Loop through each Contact and add the Account Id and Contact to the map
-        
+        for (Contact c : contacts){
+            accContact.put(c.AccountId, c.Id);
+        }
         // Loop through each Opportunity
-
-                // Update the Opportunity primary contact from accountToContactMap
-
+        for(Opportunity opp : closedWonOpps){
+            // Update the Opportunity primary contact from accountToContactMap
+            opp.Primary_Contact__c = accContact.get(opp.AccountId);
+        }
         // Update the Opportunities
+        update closedWonOpps;
     }
 }
